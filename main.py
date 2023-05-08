@@ -16,7 +16,7 @@ if __name__ == '__main__':
     set_global()
 
     pc = PointCloud('03', '-bin.pcd')
-    # pc.show()
+    pc.show()
     features = pc.extract_features()
     holes = pc.segment_image(io.imread(os.path.realpath('.') + os.getenv('prep_path') + '03-bin.png'), 1/spatial_res)
 
