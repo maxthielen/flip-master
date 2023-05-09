@@ -47,7 +47,7 @@ class PointCloud:
         self.MM_PER_DIST = os.getenv("mm_per_dist")
 
         if file_type == ".pcd" or file_type == "-bin.pcd":
-            self.file_path = os.path.realpath('.') + os.getenv("pcd_path") + file_name + file_type
+            self.file_path = os.path.realpath('') + os.getenv("pcd_path") + file_name + file_type
         elif file_type == ".png":
             # todo:: check if pcd file already exists
 
