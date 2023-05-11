@@ -25,8 +25,3 @@ if __name__ == '__main__':
     
     print(f"Features: {features}")
     print(f"Holes: {holes}")
-
-
-
-
-
