@@ -20,6 +20,11 @@ class FlipMaster(object):
 
         # todo:: send ros message to UR5 to flip + callback function from piston sensor confirmation
 
+    def flipCallback(self):
+        if self.state != State.FLIP:
+            return # maybe an error
+        self.state = State.IDLE
+
     def scan(self):
         if self.state != State.IDLE:
             raise WorkInProgress()
