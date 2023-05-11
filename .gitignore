@@ -160,3 +160,12 @@ cython_debug/
 
 # VS
 .vs/
+
+# We dont care to update the data folder either
+data/**
+
+img/
+pcd/
+prep/
+
+*.png
