@@ -1,27 +1,42 @@
-# building image
-FROM ubuntu:20.04 as builder
-MAINTAINER Max Thielen "497441@student.saxion.nl"
+# 20.04 is not the latest lts but necessary for ROS2 foxy
+FROM ubuntu:20.04
 
-# Install necessary packages
-RUN apt-get -y update && apt-get -y upgrade
-RUN apt-get install -y python3 python3.8-venv
+# Update, install python essentials, and git
+RUN apt-get update && apt-get install -y python3 python3.8-venv &&  apt-get install -y git
+
+# ROS2 foxy Dockerfile build tutorial: https://devanshdhrafani.github.io/blog/2021/04/15/dockerros2.html
+# Set-up ROS2 package sources
+RUN apt-get update && apt-get install -y curl gnupg2 lsb-release
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# Install ROS2 foxy packages
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y ros-foxy-desktop
+
+# Set-up ROS2 workspace and clone tutorials
+WORKDIR /root/dev_ws/src
+RUN git clone https://github.com/ros/ros_tutorials.git -b foxy-devel
+WORKDIR /root/dev_ws
+
+# Install rosdep (resolves missing dependencies) and colcon (next iter of catkin_make)
+RUN apt-get install python3-rosdep -y && rosdep init && rosdep update
+RUN rosdep install -i --from-path src --rosdistro foxy -y
+RUN apt-get install python3-colcon-common-extensions -y
 
 # Setup the python venv
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
 # Copy the pip requirements
 COPY requirements.txt .
+
 # Install python requirements
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --upgrade -r requirements.txt
 
-# running image
-FROM ubuntu:20.04
-
-#RUN addgroup --system app && adduser --system --group app
-
 # Install Open3D system dependencies and opencv
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt update && apt-get install --no-install-recommends -y \
     libgl1 \
     libgomp1 \
     python3-opencv \
@@ -32,9 +47,6 @@ COPY --from=builder /opt/venv /opt/venv
 
 # Copy everything to the docker container
 COPY . ./
-
-# Make data folders for python program
-# RUN mkdir -p data/classifier_output data/dstv_output/products data/preprocessing_output data/product_database
 
 # Set venv enviroment variable
 ENV PATH="/opt/venv/bin:$PATH"
