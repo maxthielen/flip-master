@@ -26,6 +26,7 @@ RUN apt-get install python3-colcon-common-extensions -y
 
 # Setup the python venv
 RUN python3 -m venv /opt/venv
+# todo:: this may have to change with the workdir set above
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy the pip requirements
@@ -36,20 +37,31 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Install Open3D system dependencies and opencv
-RUN apt update && apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     libgl1 \
     libgomp1 \
     python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy venv from builder stage
-COPY --from=builder /opt/venv /opt/venv
-
 # Copy everything to the docker container
 COPY . ./
 
-# Set venv enviroment variable
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Command that is run when docker run is called.
-ENTRYPOINT ["python3", "src/main.py"]
+ENTRYPOINT ["python3", "main.py"]
+
+# i am stuck here:
+
+# docker run -it -d flip/master:latest
+# docker ps
+# docker exec -it <NAMES> bash
+# - should be in ~/dev_ws#
+# cd ../..
+# - should be in ~#
+# source opt/ros/foxy/setup.bash
+# echo "source /opt/ros/foxy/setup.bash" >> ~/ .bashrc (didnt do anything)
+# - now ros2 command works but cant got back to ~/dev_ws
+# printenv | grep -i ROS
+# ros2 
+# ros2 run demo_nodes_cpp talker
+# ros2 run demo_nodes_cpp listener
+# - but when cloning tutorial and ros2 launch <launch file> or ros2 run talker or ./talker or python talker.py lib (rospy or rclpy) is still missing
