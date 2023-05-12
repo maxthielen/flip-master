@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import cv2 as cv
 import open3d as o3d
-from lib.plate_point_cloud import PlatePointCloud
+from ..modules.plate_point_cloud import PlatePointCloud
 
 # For most point clouds, the smallest resolution is 0.4mm, which gives a
 # spatial resolution of 1/0.4 = 2.5 pix/mm.

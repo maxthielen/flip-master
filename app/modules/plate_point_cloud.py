@@ -6,7 +6,7 @@ import numpy as np
 import cv2 as cv
 # taken from
 # https://robotics-foundation.readthedocs.io/en/latest/python/num.html
-from lib import pcd_utils as mr
+from ..library import pcd_utils as mr
 
 
 class PlatePointCloud(object):

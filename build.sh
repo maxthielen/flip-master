@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t flip/master .
+docker build -t flip-master .

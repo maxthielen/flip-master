@@ -8,9 +8,9 @@ from datetime import datetime
 
 from skimage import measure
 
-from lib.pcd_to_2d import to_2d
-from lib.convert_file_type import img_to_pcd
-from lib import preprocessing as prep
+from ..library.pcd_to_2d import to_2d
+from ..library.convert_file_type import img_to_pcd
+from ..library import preprocessing as prep
 from skimage.measure import regionprops
 
 

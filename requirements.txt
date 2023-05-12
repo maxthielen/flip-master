@@ -1,10 +1,12 @@
 numpy
+numpy-quaternion==2022.4.3
+matplotlib
 scikit-image
 scikit-learn
+transforms3d==0.4.1
 open3d
 opencv-python
 scipy
-matplotlib
 imutils
 python-dotenv
 Pillow
