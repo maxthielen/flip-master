@@ -199,10 +199,11 @@ class PlatePointCloud(object):
         pts_i = self._nonhomogeneous(Pts_i)
 
         # Optionally: show boundaries of projected image points.
-        # print(pts_i[0, :].min(),
-        #       pts_i[1, :].min(),
-        #       pts_i[0, :].max(),
-        #       pts_i[1, :].max())
+        print("boundaries of projected image points:")
+        print(pts_i[0, :].min(),
+              pts_i[1, :].min(),
+              pts_i[0, :].max(),
+              pts_i[1, :].max())
 
         # Pre-allocate arrays for a 3-channel intensity image, 1-channel depth
         # image, and a binary mask.

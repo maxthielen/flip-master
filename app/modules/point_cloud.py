@@ -13,6 +13,7 @@ from ..library.convert_file_type import img_to_pcd
 from ..library import preprocessing as prep
 from skimage.measure import regionprops
 
+from time import sleep
 
 def preprocess_pcd(pcd: o3d.geometry.PointCloud, thickness: float):
     """
@@ -25,16 +26,39 @@ def preprocess_pcd(pcd: o3d.geometry.PointCloud, thickness: float):
     :returns (o3d.geometry.PointCloud) processed point cloud
     """
     xyz = np.asarray(pcd.points)
+    
     # filtered pcd which is used for the preprocessing
     pcd_sel = pcd.select_by_index(np.where(xyz[:, 2] >= 0)[0])
+    # o3d.visualization.draw_geometries([pcd_sel], window_name='pcd_sel', mesh_show_wireframe=True)
 
     # Filter out all values too far away from the steel plate z-axis
     pcd_filtered = prep.filter_out_steel_plate(pcd_sel, thickness)
+    # o3d.visualization.draw_geometries([pcd_filtered], window_name='pcd_filtered')
+
     # Remove the outliers from the filtered pcd
     pcd_inliers = prep.remove_outliers(pcd_filtered)
+    # o3d.visualization.draw_geometries([pcd_inliers], window_name='pcd_inliers', mesh_show_wireframe=True)
 
     # Get the axis aligned bounding box
     aabb = prep.get_bounding_box(pcd_inliers)
+
+    vis = o3d.visualization.Visualizer()
+    vis.create_window()
+
+    # geometry is the point cloud used in your animaiton
+    geometry = o3d.geometry.PointCloud()
+    vis.add_geometry(geometry)
+
+    pcd_list = [pcd, pcd_sel, pcd_filtered, pcd_inliers]
+    for _pcd in pcd_list:
+        # now modify the points of your geometry
+        # you can use whatever method suits you best, this is just an example
+        geometry.points = _pcd.points
+        vis.update_geometry(geometry)
+        vis.poll_events()
+        vis.update_renderer()
+        sleep(10)
+
     # Crop the picture with the bbox
     pcd = pcd_inliers.crop(aabb)
 
@@ -99,6 +123,8 @@ class PointCloud:
         # apply preprocessing
         _start_time = datetime.now()
         pcd = preprocess_pcd(pcd, thickness)
+        o3d.visualization.draw_geometries([pcd])
+        
 
         plate_top_pcd = o3d.geometry.PointCloud()
         xyz = np.asarray(pcd.points)
@@ -140,11 +166,13 @@ class PointCloud:
         # peak dist bins is the minimum distance in bins between two recognized peaks
         peak_dist_bins = 5
 
+        print(f"z: {z}")
         min_max_dist = max(z) - min(z)
         bin_size = bin_size_mm / float(self.MM_PER_DIST)
         bin_amt = round(min_max_dist / bin_size)
 
         z_hist = np.histogram(z, bins=bin_amt)
+        print(f"z_hist: {z_hist[0]}")
 
         # prominence set manually, might need tweaking/alternative
         peaks = signal.find_peaks(z_hist[0], distance=peak_dist_bins, prominence=6000)
@@ -160,6 +188,11 @@ class PointCloud:
         conveyor = peaks[0]
         bottom = peaks[1]
         top = peaks[-1]
+
+        print(f"peaks: {peaks}")
+        print(f"top: {peaks[-1]}")
+        print(f"bottom: {peaks[1]}")
+        print(f"'conveyor': {peaks[0]}")
 
         # We add the min(z) back to the peaks, so that the peaks from the histogram align with the peaks in the pcd
         return {

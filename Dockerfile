@@ -1,12 +1,29 @@
-ARG BASE_IMAGE=osrf/ros:foxy-desktop
-FROM osrf/ros:foxy-desktop
 ARG ROS_DISTRO:=foxy
+ARG BASE_IMAGE=osrf/ros:foxy-desktop
 
+FROM osrf/ros:foxy-desktop
 RUN . /opt/ros/foxy/setup.sh
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+ENV ROS_DOMAIN_ID 6
+ENV NVIDIA_DRIVER_CAPABILITIES all
+SHELL ["/bin/bash", "-c"] 
+
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
+
+RUN distribution=$(. /etc/os-release;echo ${ID}${VERSION_ID}) \
+    && curl -s -L https://nvidia.github.io/nvidia-docker/${distribution}/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list
+
+# Install GPU drivers and NVIDIA Container Toolkit
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \ 
+    nvidia-container-toolkit \
+    nvidia-docker2
 
 # Update, install python essentials
 RUN apt-get update && apt-get install -y python3-pip python3-tk
-#python3.8-venv
 
 # Install sensor_msgs_py from common_interfaces
 RUN apt-get install -y ros-rolling-sensor-msgs-py
@@ -32,7 +49,13 @@ RUN pip install --upgrade --no-cache-dir pip \
     pip install --upgrade --no-cache-dir -r requirements.txt
 
 # Copy everything to the docker container
-COPY . ./
+
+COPY main.py ./
+COPY app/ ./app
+COPY data/ ./data
+
+RUN mkdir /sys/fs/cgroup/systemd
+RUN mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
 
 # Command that is run when docker run is called.
 CMD ["python3", "main.py"]

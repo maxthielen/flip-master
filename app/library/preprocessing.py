@@ -42,15 +42,18 @@ def get_bounding_box(pcd: o3d.geometry.PointCloud):
 
     # Get the bounding box of the steel plate
     aabb = pcd.get_axis_aligned_bounding_box()
+    
     # Get the points of the bbox, so we can resize it.
     aabb_points = np.asarray(aabb.get_box_points())
 
     # Resize the bbox that makes sure we don't miss anything around the edges.
     aabb_points[:, 0] = aabb_points[:, 0] * [0.95, 1.025, 0.95, 0.95, 1.025, 0.95, 1.025, 1.025]
     aabb_points[:, 1] = aabb_points[:, 1] * [0.95, 1.025, 0.95, 0.95, 1.025, 0.95, 1.025, 1.025]
-
+    print(aabb_points)
+    
     # Recreate the bbox with the new values
     aabb_points = o3d.utility.Vector3dVector(aabb_points)
+    
     aabb.clear()
     return aabb.create_from_points(aabb_points)
 
