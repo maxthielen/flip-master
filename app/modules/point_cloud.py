@@ -200,6 +200,27 @@ class PointCloud:
             'top': top * bin_size + min(z)
         }
 
+    def get_position(self, pcd):
+        """get the length and width based off a pcd only containing points belonging to the plate using minimum bounding box
+
+        Args:
+            pcd (PointCloud): a pointcloud containing only points belonging to the plate
+
+        Returns:
+            dict: dictionary with 'length' and 'width' attributes
+        """
+
+        xyz = np.asarray(pcd.points)
+        xy = xyz[:, (0, 1)].astype(np.float32)
+
+        # get the corners of the counding box
+        _, size, _ = cv.minAreaRect(xy)
+
+        length = max(size) * float(self.MM_PER_DIST)
+        width = min(size) * float(self.MM_PER_DIST)
+
+        return {'x': x, 'y': y}
+
     def get_length_width(self, pcd):
         """get the length and width based off a pcd only containing points belonging to the plate using minimum bounding box
 
